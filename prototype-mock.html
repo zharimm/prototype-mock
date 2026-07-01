@@ -51,16 +51,26 @@
 
   .topbar-group {
     display: flex;
+    align-items: center;
     gap: 8px;
   }
 
+  #apiKeyRow {
+    display: flex;
+    align-items: center;
+  }
+
   .btn {
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: var(--panel);
     border: 1px solid var(--panel-border);
     color: var(--text);
     font-size: 12px;
     letter-spacing: 0.02em;
-    padding: 8px 14px;
+    padding: 0 14px;
     border-radius: 20px;
     cursor: pointer;
     transition: background 0.15s ease, border-color 0.15s ease;
@@ -101,7 +111,7 @@
     background: #0a0a0a;
     border: 1px solid #2c2c2c;
     box-shadow: 0 0 0 2px #000, 0 30px 60px rgba(0,0,0,0.6);
-    transition: width 0.25s ease, height 0.25s ease, border-radius 0.25s ease;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -121,14 +131,12 @@
     padding: 9px;
   }
 
-  .device.iphone.landscape {
-    width: 660px;
-    height: 320px;
-  }
-
-  .device.ipad.landscape {
-    width: 700px;
-    height: 520px;
+  /* Landscape rotates the whole device (frame, notch, home indicator)
+     counter-clockwise (to the left) as one rigid body — the
+     counter-rotated .screen-overlay below keeps the actual UI content
+     upright. */
+  .device.landscape {
+    transform: rotate(-90deg);
   }
 
   .device-screen {
@@ -139,12 +147,14 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    z-index: 1;
   }
 
   .iphone .device-screen { border-radius: 45px; }
   .ipad .device-screen { border-radius: 25px; }
 
-  /* notch / dynamic island */
+  /* notch / dynamic island — rotates naturally with .device, no
+     orientation-specific overrides needed */
   .notch {
     position: absolute;
     top: 10px;
@@ -155,7 +165,6 @@
     background: #000;
     border-radius: 16px;
     z-index: 5;
-    transition: all 0.25s ease;
   }
 
   .ipad .notch {
@@ -165,21 +174,7 @@
     border-radius: 50%;
   }
 
-  .iphone.landscape .notch {
-    top: 50%;
-    left: 14px;
-    transform: translateY(-50%);
-    width: 26px;
-    height: 90px;
-  }
-
-  .ipad.landscape .notch {
-    top: 50%;
-    left: 10px;
-    transform: translateY(-50%);
-  }
-
-  /* home indicator */
+  /* home indicator — rotates naturally with .device */
   .home-indicator {
     position: absolute;
     bottom: 10px;
@@ -190,16 +185,37 @@
     background: #3a3a3a;
     border-radius: 3px;
     z-index: 5;
-    transition: all 0.25s ease;
   }
 
-  .landscape .home-indicator {
-    bottom: 50%;
-    left: auto;
-    right: 10px;
-    transform: translateY(50%);
-    width: 4px;
-    height: 110px;
+  /* ---------- Screen overlay (upright UI content) ----------
+     Sibling of .device-screen, not a descendant, so it isn't clipped
+     by .device-screen's overflow:hidden. Sized to the exact inner
+     screen dimensions and counter-rotated in landscape so its content
+     always renders upright while the frame around it is rotated. */
+  .screen-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    flex-direction: column;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+  }
+
+  .device.iphone .screen-overlay { width: 306px; height: 646px; }
+  .device.ipad .screen-overlay { width: 502px; height: 682px; }
+
+  .device.iphone.landscape .screen-overlay {
+    width: 646px;
+    height: 306px;
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+
+  .device.ipad.landscape .screen-overlay {
+    width: 682px;
+    height: 502px;
+    transform: translate(-50%, -50%) rotate(90deg);
   }
 
   /* ---------- Screen content ---------- */
@@ -214,8 +230,8 @@
     gap: 12px;
   }
 
-  .landscape .screen-content {
-    padding: 24px 56px;
+  .device.landscape .screen-content {
+    padding: 24px 40px;
   }
 
   .step-badge {
@@ -244,29 +260,31 @@
     margin-top: 8px;
   }
 
-  /* ---------- In-frame nav arrows ---------- */
+  /* ---------- Nav arrows (outside the device, flanking it) ----------
+     Positioned via JS (positionNavArrows()) relative to #stage, based on
+     the device's current bounding box, so they track its size/orientation.
+     left/top transition alongside the device's own rotate/resize so both
+     move in sync. */
   .nav-arrow {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: rgba(0,0,0,0.05);
-    border: 1px solid #d5d5d5;
-    color: #1a1a1a;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--text);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 6;
-    font-size: 14px;
+    z-index: 40;
+    font-size: 16px;
     user-select: none;
+    transform: translateY(-50%);
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1), top 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.15s ease, border-color 0.15s ease;
   }
 
-  .nav-arrow:hover { background: rgba(0,0,0,0.1); }
-  .nav-arrow.prev { left: 12px; }
-  .nav-arrow.next { right: 12px; }
+  .nav-arrow:hover { background: #1c1c1c; border-color: #3a3a3a; }
   .nav-arrow.disabled { opacity: 0.25; pointer-events: none; }
 
   /* ---------- Progress dots (bottom bar) ---------- */
@@ -424,18 +442,15 @@
     color: #000;
   }
 
-  .apikey-add-btn {
-    width: 100%;
-  }
-
   .apikey-chip {
+    height: 36px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    background: #1a1a1a;
+    gap: 6px;
+    background: var(--panel);
     border: 1px solid var(--panel-border);
-    border-radius: 10px;
-    padding: 8px 10px;
+    border-radius: 20px;
+    padding: 0 8px 0 14px;
   }
 
   .apikey-chip .value {
@@ -500,31 +515,34 @@
   <div class="topbar">
     <div class="topbar-group">
       <button class="btn btn-icon" id="menuBtn" title="Menu">&#9776;</button>
-      <button class="btn btn-icon" id="settingsBtn" title="Settings">&#9881;</button>
+      <button class="btn" id="settingsBtn" data-i18n="settingsTitle">Settings</button>
+      <div id="apiKeyRow"></div>
     </div>
     <div class="topbar-group">
-      <button class="btn btn-icon" id="orientationBtn" title="Rotate device">&#10227;</button>
+      <button class="btn" id="orientationBtn" data-i18n="rotate">Rotate</button>
       <button class="btn" id="restartBtn" data-i18n="restart">Restart</button>
     </div>
   </div>
 
-  <div class="stage">
+  <div class="stage" id="stage">
+    <div class="nav-arrow prev" id="prevBtn">&#8592;</div>
+
     <div class="device iphone" id="device">
       <div class="device-screen">
         <div class="notch"></div>
+        <div class="home-indicator"></div>
+      </div>
 
-        <div class="nav-arrow prev" id="prevBtn">&#8592;</div>
-        <div class="nav-arrow next" id="nextBtn">&#8594;</div>
-
+      <div class="screen-overlay" id="screenOverlay">
         <div class="screen-content">
           <div class="step-badge" id="stepBadge">1</div>
           <div class="step-label" id="stepLabel" data-i18n="stepLabel">Step 1</div>
           <div class="step-line"></div>
         </div>
-
-        <div class="home-indicator"></div>
       </div>
     </div>
+
+    <div class="nav-arrow next" id="nextBtn">&#8594;</div>
   </div>
 
   <div class="bottombar" id="dots"></div>
@@ -549,11 +567,6 @@
         <p class="settings-label" data-i18n="deviceLabel">Device</p>
         <div class="segmented" id="deviceSegmented"></div>
       </div>
-
-      <div class="settings-section">
-        <p class="settings-label" data-i18n="apiKeyLabel">AI API Key</p>
-        <div id="apiKeyRow"></div>
-      </div>
     </div>
   </div>
 
@@ -573,9 +586,17 @@
   const TOTAL_STEPS = 3;
   const LANGS = ["en", "de", "fr"];
 
+  // Portrait pixel dimensions of each device frame — kept in sync with the
+  // .device.iphone / .device.ipad width/height rules in <style>.
+  const DEVICE_SIZES = {
+    iphone: { width: 320, height: 660 },
+    ipad: { width: 520, height: 700 }
+  };
+
   const i18n = {
     en: {
       restart: "Restart",
+      rotate: "Rotate",
       menuTitle: "Steps",
       settingsTitle: "Settings",
       languageLabel: "Language",
@@ -591,6 +612,7 @@
     },
     de: {
       restart: "Neustart",
+      rotate: "Drehen",
       menuTitle: "Schritte",
       settingsTitle: "Einstellungen",
       languageLabel: "Sprache",
@@ -606,6 +628,7 @@
     },
     fr: {
       restart: "Redémarrer",
+      rotate: "Pivoter",
       menuTitle: "Étapes",
       settingsTitle: "Paramètres",
       languageLabel: "Langue",
@@ -629,6 +652,7 @@
     apiKey: null
   };
 
+  const stageEl = document.getElementById("stage");
   const deviceEl = document.getElementById("device");
   const restartBtn = document.getElementById("restartBtn");
   const orientationBtn = document.getElementById("orientationBtn");
@@ -676,6 +700,29 @@
       const val = t()[key];
       if (typeof val === "string") el.placeholder = val;
     });
+  }
+
+  function positionNavArrows() {
+    // Computed analytically from state (not deviceEl.getBoundingClientRect())
+    // because the device is mid-CSS-transition when render() runs — reading
+    // its live rect at that instant would return the *pre*-transition box,
+    // putting the arrows a step behind (visible as "arrows only catch up on
+    // the next click"). The device only ever rotates in 90deg increments,
+    // so its on-screen footprint is fully determined by state.device/orientation.
+    const base = DEVICE_SIZES[state.device];
+    const rotated = state.orientation === "landscape";
+    const boxWidth = rotated ? base.height : base.width;
+
+    const stageRect = stageEl.getBoundingClientRect();
+    const gap = 28;
+    const arrowSize = 40;
+    const centerX = stageRect.width / 2;
+    const centerY = stageRect.height / 2;
+
+    prevBtn.style.top = centerY + "px";
+    nextBtn.style.top = centerY + "px";
+    prevBtn.style.left = (centerX - boxWidth / 2 - gap - arrowSize) + "px";
+    nextBtn.style.left = (centerX + boxWidth / 2 + gap) + "px";
   }
 
   function buildDots() {
@@ -730,8 +777,9 @@
       });
       deviceSegmented.appendChild(b);
     });
+  }
 
-    // API key row
+  function buildApiKeyButton() {
     apiKeyRow.innerHTML = "";
     if (state.apiKey) {
       const chip = document.createElement("div");
@@ -757,7 +805,7 @@
     } else {
       const addBtn = document.createElement("button");
       addBtn.type = "button";
-      addBtn.className = "btn apikey-add-btn";
+      addBtn.className = "btn";
       addBtn.textContent = t().addApiKey;
       addBtn.addEventListener("click", () => openApiKeyPopover(addBtn));
       apiKeyRow.appendChild(addBtn);
@@ -783,6 +831,8 @@
     buildDots();
     buildMenu();
     buildSettingsPanel();
+    buildApiKeyButton();
+    positionNavArrows();
   }
 
   function goToStep(n) {
@@ -886,6 +936,8 @@
       else closeMenu();
     }
   });
+
+  window.addEventListener("resize", positionNavArrows);
 
   render();
 })();
