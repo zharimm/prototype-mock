@@ -92,6 +92,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
+    font-size: 15px;
   }
 
   /* ---------- Device frames ---------- */
@@ -120,6 +121,16 @@
     padding: 9px;
   }
 
+  .device.iphone.landscape {
+    width: 660px;
+    height: 320px;
+  }
+
+  .device.ipad.landscape {
+    width: 700px;
+    height: 520px;
+  }
+
   .device-screen {
     position: relative;
     width: 100%;
@@ -144,6 +155,7 @@
     background: #000;
     border-radius: 16px;
     z-index: 5;
+    transition: all 0.25s ease;
   }
 
   .ipad .notch {
@@ -151,6 +163,20 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
+  }
+
+  .iphone.landscape .notch {
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 90px;
+  }
+
+  .ipad.landscape .notch {
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
   }
 
   /* home indicator */
@@ -164,6 +190,16 @@
     background: #3a3a3a;
     border-radius: 3px;
     z-index: 5;
+    transition: all 0.25s ease;
+  }
+
+  .landscape .home-indicator {
+    bottom: 50%;
+    left: auto;
+    right: 10px;
+    transform: translateY(50%);
+    width: 4px;
+    height: 110px;
   }
 
   /* ---------- Screen content ---------- */
@@ -176,6 +212,10 @@
     padding: 40px 24px;
     text-align: center;
     gap: 12px;
+  }
+
+  .landscape .screen-content {
+    padding: 24px 56px;
   }
 
   .step-badge {
@@ -256,7 +296,7 @@
     transform: scale(1.3);
   }
 
-  /* ---------- Menu popover ---------- */
+  /* ---------- Popovers (shared) ---------- */
   .menu-overlay {
     position: fixed;
     inset: 0;
@@ -293,7 +333,7 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
-    margin: 0 0 14px 0;
+    margin: 0 0 10px 0;
   }
 
   #menuItems {
@@ -334,8 +374,124 @@
     color: var(--accent);
   }
 
-  .menu-title {
-    margin-bottom: 10px;
+  /* ---------- Settings popover ---------- */
+  .settings-panel {
+    width: 260px;
+  }
+
+  .settings-section {
+    margin-bottom: 16px;
+  }
+
+  .settings-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .settings-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 0 0 8px 0;
+  }
+
+  .segmented {
+    display: flex;
+    gap: 2px;
+    background: #1a1a1a;
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 2px;
+  }
+
+  .segmented button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 8px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .segmented button:hover { color: var(--text); }
+
+  .segmented button.active {
+    background: var(--accent);
+    color: #000;
+  }
+
+  .apikey-add-btn {
+    width: 100%;
+  }
+
+  .apikey-chip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1a1a1a;
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 8px 10px;
+  }
+
+  .apikey-chip .value {
+    color: var(--text);
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+
+  .apikey-remove {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 3px 7px;
+    border-radius: 6px;
+    line-height: 1;
+  }
+
+  .apikey-remove:hover {
+    color: #ff8080;
+    background: rgba(255,255,255,0.06);
+  }
+
+  /* ---------- API key entry popover ---------- */
+  .apikey-panel {
+    width: 220px;
+  }
+
+  .apikey-input {
+    width: 100%;
+    background: #1a1a1a;
+    border: 1px solid var(--panel-border);
+    color: var(--text);
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-family: inherit;
+    margin-bottom: 12px;
+    outline: none;
+  }
+
+  .apikey-input:focus {
+    border-color: var(--accent);
+  }
+
+  .apikey-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .apikey-actions .btn {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 </style>
 </head>
@@ -344,10 +500,10 @@
   <div class="topbar">
     <div class="topbar-group">
       <button class="btn btn-icon" id="menuBtn" title="Menu">&#9776;</button>
-      <button class="btn" id="deviceBtn" data-i18n="deviceToggle">iPad view</button>
+      <button class="btn btn-icon" id="settingsBtn" title="Settings">&#9881;</button>
     </div>
     <div class="topbar-group">
-      <button class="btn" id="langBtn">DE</button>
+      <button class="btn btn-icon" id="orientationBtn" title="Rotate device">&#10227;</button>
       <button class="btn" id="restartBtn" data-i18n="restart">Restart</button>
     </div>
   </div>
@@ -380,43 +536,121 @@
     </div>
   </div>
 
+  <div class="menu-overlay" id="settingsOverlay">
+    <div class="menu-panel settings-panel" id="settingsPanel">
+      <p class="menu-title" data-i18n="settingsTitle">Settings</p>
+
+      <div class="settings-section">
+        <p class="settings-label" data-i18n="languageLabel">Language</p>
+        <div class="segmented" id="langSegmented"></div>
+      </div>
+
+      <div class="settings-section">
+        <p class="settings-label" data-i18n="deviceLabel">Device</p>
+        <div class="segmented" id="deviceSegmented"></div>
+      </div>
+
+      <div class="settings-section">
+        <p class="settings-label" data-i18n="apiKeyLabel">AI API Key</p>
+        <div id="apiKeyRow"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-overlay" id="apiKeyOverlay">
+    <div class="menu-panel apikey-panel" id="apiKeyPanel">
+      <p class="menu-title" data-i18n="apiKeyEnterTitle">Add API Key</p>
+      <input type="password" id="apiKeyInput" class="apikey-input" data-i18n-placeholder="apiKeyPlaceholder" autocomplete="off" spellcheck="false">
+      <div class="apikey-actions">
+        <button class="btn" id="apiKeyCancelBtn" data-i18n="cancel">Cancel</button>
+        <button class="btn active" id="apiKeySaveBtn" data-i18n="save">Save</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 (function () {
   const TOTAL_STEPS = 3;
+  const LANGS = ["en", "de", "fr"];
 
   const i18n = {
     en: {
-      deviceToggleToIpad: "iPad view",
-      deviceToggleToIphone: "iPhone view",
       restart: "Restart",
       menuTitle: "Steps",
+      settingsTitle: "Settings",
+      languageLabel: "Language",
+      deviceLabel: "Device",
+      apiKeyLabel: "AI API Key",
+      addApiKey: "Add key",
+      removeApiKey: "Remove key",
+      apiKeyEnterTitle: "Add API Key",
+      apiKeyPlaceholder: "sk-...",
+      save: "Save",
+      cancel: "Cancel",
       step: (n) => `Step ${n}`
     },
     de: {
-      deviceToggleToIpad: "iPad-Ansicht",
-      deviceToggleToIphone: "iPhone-Ansicht",
       restart: "Neustart",
       menuTitle: "Schritte",
+      settingsTitle: "Einstellungen",
+      languageLabel: "Sprache",
+      deviceLabel: "Gerät",
+      apiKeyLabel: "KI-API-Schlüssel",
+      addApiKey: "Schlüssel hinzufügen",
+      removeApiKey: "Schlüssel entfernen",
+      apiKeyEnterTitle: "API-Schlüssel hinzufügen",
+      apiKeyPlaceholder: "sk-...",
+      save: "Speichern",
+      cancel: "Abbrechen",
       step: (n) => `Schritt ${n}`
+    },
+    fr: {
+      restart: "Redémarrer",
+      menuTitle: "Étapes",
+      settingsTitle: "Paramètres",
+      languageLabel: "Langue",
+      deviceLabel: "Appareil",
+      apiKeyLabel: "Clé API IA",
+      addApiKey: "Ajouter une clé",
+      removeApiKey: "Supprimer la clé",
+      apiKeyEnterTitle: "Ajouter une clé API",
+      apiKeyPlaceholder: "sk-...",
+      save: "Enregistrer",
+      cancel: "Annuler",
+      step: (n) => `Étape ${n}`
     }
   };
 
   const state = {
     device: "iphone",
+    orientation: "portrait",
     lang: "en",
-    step: 1
+    step: 1,
+    apiKey: null
   };
 
-  const body = document.body;
   const deviceEl = document.getElementById("device");
-  const deviceBtn = document.getElementById("deviceBtn");
-  const langBtn = document.getElementById("langBtn");
   const restartBtn = document.getElementById("restartBtn");
+  const orientationBtn = document.getElementById("orientationBtn");
+
   const menuBtn = document.getElementById("menuBtn");
   const menuOverlay = document.getElementById("menuOverlay");
   const menuPanel = document.getElementById("menuPanel");
   const menuItems = document.getElementById("menuItems");
-  const menuTitleEl = document.querySelector('[data-i18n="menuTitle"]');
+
+  const settingsBtn = document.getElementById("settingsBtn");
+  const settingsOverlay = document.getElementById("settingsOverlay");
+  const settingsPanel = document.getElementById("settingsPanel");
+  const langSegmented = document.getElementById("langSegmented");
+  const deviceSegmented = document.getElementById("deviceSegmented");
+  const apiKeyRow = document.getElementById("apiKeyRow");
+
+  const apiKeyOverlay = document.getElementById("apiKeyOverlay");
+  const apiKeyPanel = document.getElementById("apiKeyPanel");
+  const apiKeyInput = document.getElementById("apiKeyInput");
+  const apiKeyCancelBtn = document.getElementById("apiKeyCancelBtn");
+  const apiKeySaveBtn = document.getElementById("apiKeySaveBtn");
+
   const stepBadge = document.getElementById("stepBadge");
   const stepLabel = document.getElementById("stepLabel");
   const prevBtn = document.getElementById("prevBtn");
@@ -425,6 +659,23 @@
 
   function t() {
     return i18n[state.lang];
+  }
+
+  function maskKey(key) {
+    return "•".repeat(8) + key.slice(-4);
+  }
+
+  function applyStaticI18n() {
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.getAttribute("data-i18n");
+      const val = t()[key];
+      if (typeof val === "string") el.textContent = val;
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+      const key = el.getAttribute("data-i18n-placeholder");
+      const val = t()[key];
+      if (typeof val === "string") el.placeholder = val;
+    });
   }
 
   function buildDots() {
@@ -451,20 +702,74 @@
     }
   }
 
+  function buildSettingsPanel() {
+    // language segmented control
+    langSegmented.innerHTML = "";
+    LANGS.forEach((code) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = code.toUpperCase();
+      b.className = state.lang === code ? "active" : "";
+      b.addEventListener("click", () => {
+        state.lang = code;
+        render();
+      });
+      langSegmented.appendChild(b);
+    });
+
+    // device segmented control
+    deviceSegmented.innerHTML = "";
+    [["iphone", "iPhone"], ["ipad", "iPad"]].forEach(([value, label]) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      b.className = state.device === value ? "active" : "";
+      b.addEventListener("click", () => {
+        state.device = value;
+        render();
+      });
+      deviceSegmented.appendChild(b);
+    });
+
+    // API key row
+    apiKeyRow.innerHTML = "";
+    if (state.apiKey) {
+      const chip = document.createElement("div");
+      chip.className = "apikey-chip";
+
+      const value = document.createElement("span");
+      value.className = "value";
+      value.textContent = maskKey(state.apiKey);
+
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "apikey-remove";
+      removeBtn.textContent = "✕";
+      removeBtn.title = t().removeApiKey;
+      removeBtn.addEventListener("click", () => {
+        state.apiKey = null;
+        render();
+      });
+
+      chip.appendChild(value);
+      chip.appendChild(removeBtn);
+      apiKeyRow.appendChild(chip);
+    } else {
+      const addBtn = document.createElement("button");
+      addBtn.type = "button";
+      addBtn.className = "btn apikey-add-btn";
+      addBtn.textContent = t().addApiKey;
+      addBtn.addEventListener("click", () => openApiKeyPopover(addBtn));
+      apiKeyRow.appendChild(addBtn);
+    }
+  }
+
   function render() {
     // device frame
-    deviceEl.className = "device " + state.device;
-    deviceBtn.textContent = state.device === "iphone"
-      ? t().deviceToggleToIpad
-      : t().deviceToggleToIphone;
+    deviceEl.className = "device " + state.device + (state.orientation === "landscape" ? " landscape" : "");
 
-    // language button shows the *other* language to switch to
-    langBtn.textContent = state.lang === "en" ? "DE" : "EN";
-
-    // restart / labels
-    restartBtn.textContent = t().restart;
+    // restart
     restartBtn.disabled = state.step === 1;
-    menuTitleEl.textContent = t().menuTitle;
 
     // step content
     stepBadge.textContent = state.step;
@@ -474,8 +779,10 @@
     prevBtn.classList.toggle("disabled", state.step === 1);
     nextBtn.classList.toggle("disabled", state.step === TOTAL_STEPS);
 
+    applyStaticI18n();
     buildDots();
     buildMenu();
+    buildSettingsPanel();
   }
 
   function goToStep(n) {
@@ -485,6 +792,7 @@
   }
 
   function openMenu() {
+    closeSettings();
     buildMenu();
     menuOverlay.classList.add("open");
     menuBtn.classList.add("active");
@@ -495,32 +803,75 @@
     menuBtn.classList.remove("active");
   }
 
-  deviceBtn.addEventListener("click", () => {
-    state.device = state.device === "iphone" ? "ipad" : "iphone";
-    render();
-  });
+  function openSettings() {
+    closeMenu();
+    buildSettingsPanel();
+    settingsOverlay.classList.add("open");
+    settingsBtn.classList.add("active");
+  }
 
-  langBtn.addEventListener("click", () => {
-    state.lang = state.lang === "en" ? "de" : "en";
+  function closeSettings() {
+    settingsOverlay.classList.remove("open");
+    settingsBtn.classList.remove("active");
+    closeApiKeyPopover();
+  }
+
+  function openApiKeyPopover(anchorEl) {
+    apiKeyInput.value = "";
+    apiKeyOverlay.classList.add("open");
+    const rect = anchorEl.getBoundingClientRect();
+    apiKeyPanel.style.top = (rect.bottom + 8) + "px";
+    apiKeyPanel.style.left = rect.left + "px";
+    setTimeout(() => apiKeyInput.focus(), 50);
+  }
+
+  function closeApiKeyPopover() {
+    apiKeyOverlay.classList.remove("open");
+  }
+
+  function saveApiKey() {
+    const value = apiKeyInput.value.trim();
+    if (value) state.apiKey = value;
+    closeApiKeyPopover();
     render();
-  });
+  }
 
   restartBtn.addEventListener("click", () => {
     state.step = 1;
     render();
   });
 
+  orientationBtn.addEventListener("click", () => {
+    state.orientation = state.orientation === "portrait" ? "landscape" : "portrait";
+    render();
+  });
+
   menuBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    if (menuOverlay.classList.contains("open")) {
-      closeMenu();
-    } else {
-      openMenu();
-    }
+    menuOverlay.classList.contains("open") ? closeMenu() : openMenu();
   });
 
   menuOverlay.addEventListener("click", (e) => {
     if (!menuPanel.contains(e.target)) closeMenu();
+  });
+
+  settingsBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    settingsOverlay.classList.contains("open") ? closeSettings() : openSettings();
+  });
+
+  settingsOverlay.addEventListener("click", (e) => {
+    if (!settingsPanel.contains(e.target)) closeSettings();
+  });
+
+  apiKeyOverlay.addEventListener("click", (e) => {
+    if (!apiKeyPanel.contains(e.target)) closeApiKeyPopover();
+  });
+
+  apiKeyCancelBtn.addEventListener("click", closeApiKeyPopover);
+  apiKeySaveBtn.addEventListener("click", saveApiKey);
+  apiKeyInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") saveApiKey();
   });
 
   prevBtn.addEventListener("click", () => goToStep(state.step - 1));
@@ -529,7 +880,11 @@
   document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowRight") goToStep(state.step + 1);
     if (e.key === "ArrowLeft") goToStep(state.step - 1);
-    if (e.key === "Escape") closeMenu();
+    if (e.key === "Escape") {
+      if (apiKeyOverlay.classList.contains("open")) closeApiKeyPopover();
+      else if (settingsOverlay.classList.contains("open")) closeSettings();
+      else closeMenu();
+    }
   });
 
   render();
